@@ -1,23 +1,46 @@
-# main.py
-# https://chatgpt.com/c/68233feb-188c-800c-8280-dccbc94778af
+# main.py 25.0513
+
+#1 ################################
+
+#1.2
+
+import markdown
+from IPython.display import display, Markdown
+
+# Example usage
+markdown_text = """
+# In‑N‑Out Burger Chatbot
+"""
+
+display(Markdown(markdown_text))
+
+#1.3
 
 import os
-import nest_asyncio
-from fastapi import FastAPI, Request
-from pydantic import BaseModel
-from fastapi.responses import HTMLResponse
-from agents import Agent, Runner
+#from google.colab import userdata
+#openai_api_key = userdata.get('OPENAI_API_KEY')
+#os.environ['OPENAI_API_KEY'] = openai_api_key
+# Verify that the key is set
+#print(f"OpenAI API key set: {bool(openai_api_key)}")
 
-# Apply asyncio patch
-nest_asyncio.apply()
-
-# Get API key from environment variable
+# Retrieve the OpenAI API key from environment variables
 openai_api_key = os.getenv('OPENAI_API_KEY')
-if not openai_api_key:
-    raise ValueError("OPENAI_API_KEY not found in environment variables.")
+
+# Verify that the key is set
+if openai_api_key:
+    print("OpenAI API key successfully retrieved from environment variables.")
+else:
+    print("Error: OpenAI API key not found in environment variables.")
+
 os.environ['OPENAI_API_KEY'] = openai_api_key
 
-# Menu data
+#1.4
+
+import nest_asyncio
+nest_asyncio.apply()
+
+#1.5
+
 MENU_PRICES = """
 
 # In‑N‑Out Burger Menu (2025)
@@ -62,37 +85,23 @@ tax is 7.25%
 
 ---"""
 
-# Set up the chatbot agent
-agent = Agent(
-    name="In-N-Out Cashier Assistant",
-    instructions=f"You are a helpful server at In-N-Out Burger. Respond to questions based on the menu below:\n\n{MENU_PRICES}",
-    model="gpt-4o"
-)
+#1.6
 
-# FastAPI app
-app = FastAPI()
+from agents import Agent, Runner
 
-class Query(BaseModel):
-    message: str
+agent = Agent(name="In-N-Out Cashier Assistant",
+              instructions=f"You are a helpful server at In-N-Out Burger respond to questions based on the menu below: \n\n{MENU_PRICES}",
+              model="gpt-4o"
+              )
 
-@app.get("/", response_class=HTMLResponse)
-def home():
-    return """
-    <h1>In-N-Out Chatbot</h1>
-    <form method="post" action="/chat">
-        <input type="text" name="message" placeholder="Ask me something..." required/>
-        <button type="submit">Send</button>
-    </form>
-    """
+#1.7
 
-@app.post("/chat", response_class=HTMLResponse)
-async def chat(request: Request):
-    form = await request.form()
-    message = form.get("message", "")
-    result = await Runner.run(agent, message)
-    return f"""
-    <h1>In-N-Out Chatbot</h1>
-    <p><strong>You:</strong> {message}</p>
-    <p><strong>Bot:</strong> {result.final_output}</p>
-    <a href="/">Ask another question</a>
-    """
+result = Runner.run_sync(agent, "How much is a Double Double?.")
+print(result.final_output)
+
+
+
+
+
+
+
